@@ -1,0 +1,22 @@
+## Tasks for this week
+
+
+- same Dataset, same split, randomization, same validation (Raafey)
+- quadratic influence in resid plots - dia messwert plot (Amir)
+- put conf intervals in summary table for lm with values of estimated parameters (Aymane)
+- investigate the type of tree model - Vimann (Farrukh/Raafey)
+- add methods for LM (Aymane)
+ * dummy encoding for variables
+ * Linear Regression
+    . Assumptions
+    . Equations for parameter estimation
+    . Hypothesis testing & confidence intervals
+    . evaluate models prediction error
+- Investigate advanced methods (Aymane) [if there's time]
+- Methods for R squared, BIC, best subset selection, cross_validation / Implementation & methods (Raafey)
+- Measures for comparison (Amir)
+    * have measures to compare models from different model classes
+    * compare these measures in terms of whether or not they give different answers 
+    * compare prediction errors
+    * describe parameters in a way customer understands
+- RECHECK THE PLOTS PLS
