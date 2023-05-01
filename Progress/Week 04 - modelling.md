@@ -11,7 +11,7 @@
 
 ### Methods (Farrukh)
  - Describe dataset used, null values dropped, what variables transformed, counts of everthing etc.
- - Methods for R squared, BIC, best subset selection/cross_validation
+ - Methods for R squared, best subset selection/cross_validation, types of errors used
 
 ## Regression Trees
 ### Methods (Farrukh)
@@ -19,8 +19,8 @@
 - State type of tree model and algorithm for that tree
 - Analysis on results of prediction errors
 
-### Implementation (Raafey)
-- Ensemble methods 
+### <mark style="background-color: #00FF00"> Implementation (Raafey) </mark>
+- <mark style="background-color: #00FF00"> Ensemble methods </mark>
 - <mark style="background-color: #00FF00"> Investigate the type of tree model - Definition </mark>
 - <mark style="background-color: #00FF00"> Methods for R squared, BIC, best subset selection </mark>
 - <mark style="background-color: #00FF00"> Generate prediction errors </mark>
@@ -48,7 +48,7 @@
 
 ## Evaluation
 ### Methods (Raafey) 
-- Have measures to compare models from different model classes
+- <mark style="background-color: #00FF00"> Have measures to compare models from different model classes </mark>
 - Compare these measures in terms of whether or not they give different answers 
 - Compare prediction errors - Analysis
 - Describe parameters in a way customer understands
