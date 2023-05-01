@@ -6,7 +6,7 @@
 
 ## General Common stuff
 ### Implementation (Raafey)
-- Same Dataset, same split, randomization, same validation, valid transformations
+- <mark style="background-color: #00FF00"> Same Dataset, same split, randomization, same validation, valid transformations </mark>
 - Refactor code into one single notebook 
 
 ### Methods (Farrukh)
@@ -21,9 +21,9 @@
 
 ### Implementation (Raafey)
 - Ensemble methods 
-- Investigate the type of tree model - Definition
-- Methods for R squared, BIC, best subset selection/cross_validation 
-- Generate prediction errors
+- <mark style="background-color: #00FF00"> Investigate the type of tree model - Definition </mark>
+- <mark style="background-color: #00FF00"> Methods for R squared, BIC, best subset selection </mark>
+- <mark style="background-color: #00FF00"> Generate prediction errors </mark>
 
 ## Linear Models
 ### Methods (Amir)
