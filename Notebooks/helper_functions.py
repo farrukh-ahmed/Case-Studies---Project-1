@@ -1,5 +1,9 @@
 import pandas as pd
 import numpy as np
+import statsmodels.formula.api as smf
+from scipy import stats
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
@@ -20,18 +24,19 @@ def format_variables(data, to_filter, drop_values):
     data_df = data.copy()
     data_df.postleitzahl = data_df.postleitzahl.astype('str')
     data_df.geburtsjahr = data_df.geburtsjahr.astype('Int64')
-    # data_df.befinden = data_df.befinden.astype('Int64')
+    data_df.befinden = data_df.befinden.astype('Int64')
     data_df.messwert_bp_sys = pd.to_numeric(data_df.messwert_bp_sys)
     data_df.messwert_bp_dia = pd.to_numeric(data_df.messwert_bp_dia)
     data_df.schaetzwert_bp_sys = pd.to_numeric(data_df.schaetzwert_bp_sys)
     data_df.schaetzwert_by_dia = pd.to_numeric(data_df.schaetzwert_by_dia)
+    data_df.befinden = data_df.befinden.astype('str')
 
     # adding variable for is_local
     mask = data_df.gemeinde.isna() & data_df.bezirk.isna() & data_df.bundesland.isna()
 
     # adding variable for age
     age =  data_df["zeit"].dt.year - pd.to_datetime(data_df['geburtsjahr'], format='%Y').dt.year
-    data_df["age"] = age.astype("Int64")
+    data_df["age"] = age
 
 
     #replacing nans for variables
@@ -42,10 +47,10 @@ def format_variables(data, to_filter, drop_values):
     data_df.loc[data_df.geschlecht.isna() == True, 'in_behandlung'] = "unknown"
     data_df.loc[data_df.geschlecht.isna() == True, 'befinden'] = "unknown"
 
-    data_df.loc[mask, 'gemeinde'] = "not applicable"
-    data_df.loc[mask, 'bezirk'] = "not applicable"
-    data_df.loc[mask, 'bundesland'] = "not applicable"
-    data_df.loc[mask, 'postleitzahl'] = "not applicable"
+    data_df.loc[mask, 'gemeinde'] = "not_applicable"
+    data_df.loc[mask, 'bezirk'] = "not_applicable"
+    data_df.loc[mask, 'bundesland'] = "not_applicable"
+    data_df.loc[mask, 'postleitzahl'] = "not_applicable"
     data_df.loc[data_df.postleitzahl == "nan", 'postleitzahl'] = "unknown"
     data_df.loc[data_df.geschlecht.isna() == True, 'geschlecht'] = "unknown"
 
@@ -58,6 +63,7 @@ def format_variables(data, to_filter, drop_values):
         # dropping nan values
         data_df = data_df.dropna()
 
+    data_df["age"] = data_df["age"].astype("int")
     data_df['befinden'] = data_df['befinden'].astype(object)
     data_df['messwert_bp_sys'] = data_df['messwert_bp_sys'].astype(float)
     data_df['messwert_bp_dia'] = data_df['messwert_bp_dia'].astype(float)
@@ -94,6 +100,7 @@ def encode_data(df, cat_feat_list, num_feat_list):
     
     return one_hot_data
 
+
 # function to separate target from dataframe
 def separate_target(data, target):
     df = data.copy()
@@ -110,8 +117,8 @@ def adjusted_r2(r_2, n, k):
 
 # function to compute metrics given target and predictions
 def compute_metrics(pred, target, num_feats):
-    r_2 = r2_score(pred, target)
-    mse = mean_squared_error(pred, target)
+    r_2 = r2_score(target, pred)
+    mse = mean_squared_error(target, pred)
     adj_r2 = adjusted_r2(r_2, len(pred), num_feats)
     return {
         "r_2": r_2,
@@ -133,8 +140,9 @@ def fit_and_eval_regression_tree(X_train, Y_train, X_test, params, model_type):
 
     return train_predictions, test_predictions, model
 
+
 # method that fits, predicts, generates eval metrics for regression tree based on model type
-def fit_model(X_train, Y_train, X_test, Y_test, model_type, params):
+def fit_model(X_train, Y_train, X_test, Y_test, model_type, params=None):
     num_feats = len(X_train.columns)
     train_predictions = None
     train_predictions = None
@@ -145,12 +153,45 @@ def fit_model(X_train, Y_train, X_test, Y_test, model_type, params):
     if model_type in ["DecisionTreeRegressor", "DecisionTreeRegressorRandomForest"]:
         train_predictions, test_predictions, model = fit_and_eval_regression_tree(X_train, Y_train, X_test, params, model_type)
 
+    if model_type == "LinearRegression":
+        train_predictions, test_predictions, model = fit_linear_model(X_train, Y_train, X_test)
+
     if train_predictions is not None and test_predictions is not None:
         train_results = compute_metrics(train_predictions, Y_train, num_feats)
         test_results = compute_metrics(test_predictions, Y_test, num_feats)
 
 
     return train_results, test_results, model
+
+
+def generate_lin_formula(target, columns):
+    pred_list = []
+    for col in columns:
+        if col != target:
+            pred_list.append(col)
+    
+    return target + " ~ " + " + ".join(pred_list)
+
+
+def fit_linear_model(X_train, Y_train, X_test):
+    train_df = X_train.copy()
+    train_df[Y_train.name] = Y_train
+
+    formula = generate_lin_formula(Y_train.name, train_df.columns)
+    model = smf.ols(formula, data=train_df).fit()
+    train_pred = model.predict(X_train) 
+    test_pred = model.predict(X_test)
+    return train_pred, test_pred, model
+
+
+def generate_qq_plot(Y):
+    stats.probplot(Y, plot=plt)
+    plt.show()
+
+
+def generate_residual_plot(Y_train, model):
+    sns.residplot(x=Y_train, y=model.resid, lowess=True, line_kws=dict(color="g"))
+
 
 # method that performs best subset feat selection based on some creiterion like mse, adjusted_r_2 or r_2
 def best_subset_selection(features, criterion, X_train, Y_train, X_test, Y_test, model_type, params, verbose):
