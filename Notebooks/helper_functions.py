@@ -8,6 +8,7 @@ from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
+import statsmodels.api as sm
 
 
 # function that reads data from csv
@@ -127,12 +128,19 @@ def compute_metrics(pred, target, num_feats):
     }
 
 # method that fits and predicts regression tree based on model type
-def fit_and_eval_regression_tree(X_train, Y_train, X_test, params, model_type):
+def fit_and_eval_regression_tree(X_train, Y_train, X_test, model_type, params=None):
     model = None
     if model_type == "DecisionTreeRegressor":
         model = DecisionTreeRegressor(**params)
     elif model_type == "DecisionTreeRegressorRandomForest":
         model = RandomForestRegressor(**params)
+    elif model_type == "LinearRegresssion":
+        x_train_sm = sm.add_constant(X_train)
+        x_test_sm = sm.add_constant(X_test)
+        lm = sm.OLS(Y_train, x_train_sm.astype(float)).fit()
+        train_prediction = lm.predict(x_train_sm)
+        test_prediction = lm.predict(x_test_sm)
+        return train_prediction, test_prediction, lm
 
     model.fit(X_train, Y_train)
     train_predictions = model.predict(X_train)
@@ -150,7 +158,7 @@ def fit_model(X_train, Y_train, X_test, Y_test, model_type, params=None):
     test_results = None
     model = None
 
-    if model_type in ["DecisionTreeRegressor", "DecisionTreeRegressorRandomForest"]:
+    if model_type in ["DecisionTreeRegressor", "DecisionTreeRegressorRandomForest", 'LinearRegresssion']:
         train_predictions, test_predictions, model = fit_and_eval_regression_tree(X_train, Y_train, X_test, params, model_type)
 
     if model_type == "LinearRegression":
