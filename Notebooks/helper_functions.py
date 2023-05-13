@@ -30,6 +30,10 @@ def format_variables(data, to_filter, drop_values):
     data_df.schaetzwert_bp_sys = pd.to_numeric(data_df.schaetzwert_bp_sys)
     data_df.schaetzwert_by_dia = pd.to_numeric(data_df.schaetzwert_by_dia)
     data_df.befinden = data_df.befinden.astype('str')
+    data_df["month"] = data_df["zeit"].dt.month
+    data_df["hour"] = data_df["zeit"].dt.hour
+    data_df["day"] = data_df["zeit"].dt.day
+
 
     # adding variable for is_local
     mask = data_df.gemeinde.isna() & data_df.bezirk.isna() & data_df.bundesland.isna()
