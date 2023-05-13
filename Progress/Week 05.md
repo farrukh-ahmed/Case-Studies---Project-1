@@ -8,7 +8,7 @@
 
 ## Creating new variables
 
- - Add terminal again (due to extra info revealed) - split terminal into 3a 3b keeping in mind new info (Amir)
+ - <mark style="background-color: #00FF00">Add terminal again (due to extra info revealed) - split terminal into 3a 3b keeping in mind new info (Amir) <mark>
  - <mark style="background-color: #00FF00">  Add day, month, hour (Aymane) <mark>
  - temperature, humidity of location where test was done (Aymane)
  - Effect of interaction terms for the linear model (Aymane)
