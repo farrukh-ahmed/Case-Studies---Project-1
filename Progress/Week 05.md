@@ -6,15 +6,17 @@
  - remove best subset for trees
 
 
-## Creating new varaibles
+## Creating new variables
 
  - Add terminal again (due to extra info revealed) - split terminal into 3a 3b keeping in mind new info (Amir)
  - Add day, month, hour (Aymane)
  - temperature, humidity of location where test was done (Aymane)
+ - Effect of interaction terms for the linear model (Aymane)
 
 ## Once 1 & 2 are done refit models (Raafey)
 
 ## Put slides for systolic and dystolic base (Results) LM
+- Final R^2 and significant covariates (Aymane)
 ## Put slides for systolic and dystolic base (Results) RT
 
 ## further analysis
