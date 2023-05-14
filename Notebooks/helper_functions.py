@@ -20,7 +20,7 @@ def read_data():
 
 
 # function to format variable types, remove nans, shuffle data
-def format_variables(data, to_filter, drop_values, weather_data=None):
+def format_variables(data, to_filter, drop_values):
     data_df = data.copy()
     data_df.postleitzahl = data_df.postleitzahl.astype('str')
     data_df.geburtsjahr = data_df.geburtsjahr.astype('Int64')
@@ -35,11 +35,10 @@ def format_variables(data, to_filter, drop_values, weather_data=None):
     data_df["hour"] = data_df["zeit"].dt.hour
     data_df["day"] = data_df["zeit"].dt.day
 
-    if weather_data is not None:
-        data_df['temp'] = data_df['temp'].astype(float)
-        data_df['humidity'] = data_df['humidity'].astype(float)
-        data_df['tempmin'] = data_df['tempmin'].astype(float)
-        data_df['tempmax'] = data_df['tempmax'].astype(float)
+    data_df['temp'] = data_df['temp'].astype(float)
+    data_df['humidity'] = data_df['humidity'].astype(float)
+    data_df['tempmin'] = data_df['tempmin'].astype(float)
+    data_df['tempmax'] = data_df['tempmax'].astype(float)
 
     # adding variable for is_local
     mask = data_df.gemeinde.isna() & data_df.bezirk.isna() & data_df.bundesland.isna()
