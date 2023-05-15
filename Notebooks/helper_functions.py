@@ -30,10 +30,15 @@ def format_variables(data, to_filter, drop_values):
     data_df.schaetzwert_bp_sys = pd.to_numeric(data_df.schaetzwert_bp_sys)
     data_df.schaetzwert_by_dia = pd.to_numeric(data_df.schaetzwert_by_dia)
     data_df.befinden = data_df.befinden.astype('str')
+
     data_df["month"] = data_df["zeit"].dt.month
     data_df["hour"] = data_df["zeit"].dt.hour
     data_df["day"] = data_df["zeit"].dt.day
 
+    data_df['temp'] = data_df['temp'].astype(float)
+    data_df['humidity'] = data_df['humidity'].astype(float)
+    data_df['tempmin'] = data_df['tempmin'].astype(float)
+    data_df['tempmax'] = data_df['tempmax'].astype(float)
 
     # adding variable for is_local
     mask = data_df.gemeinde.isna() & data_df.bezirk.isna() & data_df.bundesland.isna()
@@ -44,7 +49,6 @@ def format_variables(data, to_filter, drop_values):
 
 
     #replacing nans for variables
-
     data_df.loc[data_df.geschlecht.isna() == True, 'raucher'] = "unknown"
     data_df.loc[data_df.geschlecht.isna() == True, 'blutzucker_bekannt'] = "unknown"
     data_df.loc[data_df.geschlecht.isna() == True, 'cholesterin_bekannt'] = "unknown"
