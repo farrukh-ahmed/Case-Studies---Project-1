@@ -67,7 +67,8 @@ def format_variables(data, to_filter, drop_values):
         # dropping nan values
         data_df = data_df.dropna()
 
-    data_df["age"] = data_df["age"].astype("int")
+        data_df["age"] = data_df["age"].astype("int")
+
     data_df['befinden'] = data_df['befinden'].astype(object)
     data_df['messwert_bp_sys'] = data_df['messwert_bp_sys'].astype(float)
     data_df['messwert_bp_dia'] = data_df['messwert_bp_dia'].astype(float)
