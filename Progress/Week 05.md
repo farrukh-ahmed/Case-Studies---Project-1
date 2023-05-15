@@ -10,7 +10,7 @@
 
  - <mark style="background-color: #00FF00">Add terminal again (due to extra info revealed) - split terminal into 3a 3b keeping in mind new info (Amir) <mark>
  - <mark style="background-color: #00FF00">  Add day, month, hour (Aymane) <mark>
- - temperature, humidity of location where test was done (Aymane)
+ - <mark style="background-color: #00FF00"> temperature, humidity of location where test was done (Aymane) <mark style="background-color: #00FF00">
  - Effect of interaction terms for the linear model (Aymane)
 
 ## Once 1 & 2 are done refit models (Raafey)
@@ -20,5 +20,5 @@
 ## Put slides for systolic and dystolic base (Results) RT
 
 ## further analysis
- - make a boxplot for treatment on bp (each type of measured bp) (Raafey)
+ - <mark style="background-color: #00FF00"> make a boxplot for treatment on bp (each type of measured bp) (Raafey) <mark style="background-color: #00FF00">
  - take a look at the districts on slide 5 (Farrukh)

@@ -14,7 +14,7 @@ import matplotlib
 
 # setting font to 'Times New Roman'
 matplotlib.rcParams["font.family"] = "Times New Roman"
-matplotlib.rcParams.update({'font.size': 16})
+matplotlib.rcParams.update({'font.size': 12})
 
 
 PLOT_COLOR = "blue"
@@ -24,7 +24,7 @@ def create_histogram(data_df, col_name, hist_dir_path):
     min_value = data_df[col_name].min()
     max_value = data_df[col_name].max()
     bins = np.linspace(min_value,max_value,20)
-
+    f, ax = plt.subplots(figsize=(7, 6))
     result = plt.hist(data_df[col_name], bins = bins, color=PLOT_COLOR, edgecolor='k', alpha=0.65)
     plt.axvline(data_df[col_name].mean(), color='k', linestyle='dashed', linewidth=1)
     plt.axvline(data_df[col_name].median(), color='k', linestyle='dashed', linewidth=2)
@@ -50,12 +50,21 @@ def create_bar_plot(data_df, col_name, barplot_dir_path):
 
     f, ax = plt.subplots(figsize=figsize)
     plt.bar(categories, counts, color =PLOT_COLOR,
-            width = 0.4)
+            width = 0.4, alpha=0.65)
 
     plt.xlabel(col_name)
     plt.ylabel("No. of people")
     plt.savefig(os.path.join(barplot_dir_path, col_name + "_Bar.pdf"), dpi=180, bbox_inches='tight')
     plt.show()
+
+
+def create_box_plot(data_df, main_col, group_col, stacked_barplot_dir_path):
+    f, ax = plt.subplots(figsize=(7, 6))
+    order = data_df.groupby(by=[group_col])[main_col].median().sort_values().index
+    plot = sns.boxplot(data=data_df, x=group_col, y=main_col, width=.5, orient="v", order=order)
+    plot.set_xticklabels(plot.get_xticklabels(),rotation=45)
+    plt.show()
+    plot.figure.savefig(os.path.join(stacked_barplot_dir_path, main_col + "_vs_" + group_col + "_barplot.pdf"), dpi=180)
 
 
 def create_heat_map(data_df, cols, misc_dir_path):
@@ -79,3 +88,63 @@ def create_scatter_plot(data_df, col_list, x, misc_dir_path):
 
 
     plt.show()
+
+
+def create_stacked_barplot(data_df, main_col, group_col, stacked_barplot_dir_path):
+    main_col_cats = data_df[main_col].unique()
+    group_col_cats = data_df[group_col].unique()
+
+    df_rows = []
+
+    for main_col_cat in main_col_cats:
+        row = [main_col_cat]
+        counts = []
+
+        _sum = 0
+        for group_col_cat in group_col_cats:
+            count = len(data_df[(data_df[main_col] == main_col_cat) & (data_df[group_col] == group_col_cat)])
+            counts.append(count)
+            _sum += count
+        
+        df_rows.append(row + counts)
+
+    for i in range(len(main_col_cats)):
+        cat = main_col_cats[i]
+        if type(cat) != str:
+            main_col_cats[i] = str(cat)
+    for i in range(len(group_col_cats)):
+        cat = group_col_cats[i]
+        if type(cat) != str:
+            group_col_cats[i] = str(cat)
+
+    df_counts = pd.DataFrame(df_rows, columns=[main_col] + list(group_col_cats))
+    df = df_counts.copy()
+    df.iloc[:, 1:] = df.iloc[:, 1:].apply(lambda x: x.div(x.sum()).mul(100), axis=1).astype(float)
+    ax = df.plot(
+    x = main_col,
+    rot = 45, 
+    kind = 'bar', 
+    stacked = True,  
+    xlabel=main_col,
+    mark_right = True,
+    figsize=(10, 8),
+    width=1.0,
+    ylabel="Percentage of participants",
+    fontsize=12
+    )
+    ax.legend(
+    bbox_to_anchor=(1.0, 1.0),
+    fontsize='small',
+    title=group_col,
+    )
+
+    for c in ax.containers:
+        label = c.get_label()
+        pct_labels = list(df[label])
+        count_labels = list(df_counts[label])
+        labels = [f'{round(pct, 1)}%' if int(count) > 0 else '' for pct, count in zip(pct_labels, count_labels)]
+        ax.bar_label(c, labels=labels, label_type='center', color="black", fontsize=12)
+
+    plt.savefig(os.path.join(stacked_barplot_dir_path, main_col + "_vs_" + group_col + "_stacked_barplot.pdf"), dpi=180)
+
+    return df, df_counts
