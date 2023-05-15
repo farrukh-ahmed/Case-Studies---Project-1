@@ -19,6 +19,31 @@ def read_data():
     return data_df
 
 
+def fetch_weather_data(odata_df):
+    data_df = odata_df.copy()
+    weather_df = pd.read_csv("../Supplementary Datasets/Weather_data_Bruck_An_Der_Mur_2006_to_2007.csv", sep=",")
+
+    # rename the column datetime to zeit:
+    weather_df = weather_df.rename(columns={"datetime": "zeit"})
+
+    # extract rows from april 2006 to december 2006 from weather_df:
+    weather_df = weather_df[weather_df["zeit"] >= "2006-04-27"]
+    weather_df = weather_df[weather_df["zeit"] <= "2006-11-06"]
+
+    data_df["zeit"] = pd.to_datetime(data_df["zeit"], format="%Y-%m-%d %H:%M:%S").dt.date
+
+    # select only the temperature, zeit, name, tempmax, tempmin, humidity, pressure:
+    weather_df = weather_df[["zeit", "temp", "tempmax", "tempmin", "humidity"]]
+
+    weather_df["zeit"] = weather_df.zeit.astype(str)
+    data_df["zeit"] = data_df.zeit.astype(str)
+
+    # add the columns temp, tempmax, tempmin, humidity to the data_df on the same rows as the zeit:
+    merged_df = pd.merge(data_df, weather_df, on="zeit", how="left")
+
+    return merged_df
+
+
 # function to format variable types, remove nans, shuffle data
 def format_variables(data, to_filter, drop_values):
     data_df = data.copy()
@@ -31,22 +56,28 @@ def format_variables(data, to_filter, drop_values):
     data_df.schaetzwert_by_dia = pd.to_numeric(data_df.schaetzwert_by_dia)
     data_df.befinden = data_df.befinden.astype('str')
 
-    data_df["month"] = data_df["zeit"].dt.month
-    data_df["hour"] = data_df["zeit"].dt.hour
-    data_df["day"] = data_df["zeit"].dt.day
-
-    data_df['temp'] = data_df['temp'].astype(float)
-    data_df['humidity'] = data_df['humidity'].astype(float)
-    data_df['tempmin'] = data_df['tempmin'].astype(float)
-    data_df['tempmax'] = data_df['tempmax'].astype(float)
-
-    # adding variable for is_local
-    mask = data_df.gemeinde.isna() & data_df.bezirk.isna() & data_df.bundesland.isna()
-
     # adding variable for age
     age =  data_df["zeit"].dt.year - pd.to_datetime(data_df['geburtsjahr'], format='%Y').dt.year
     data_df["age"] = age
 
+    data_df["month"] = data_df["zeit"].dt.month
+    data_df["hour"] = data_df["zeit"].dt.hour
+    data_df["day"] = data_df["zeit"].dt.day
+
+    # seggregating terminal when instrument was changed
+    data_df["terminal"] = np.where(data_df["month"].astype('int') <= 6, "3a", "3b")
+
+    # adding temp info
+    data_df = fetch_weather_data(data_df)
+    data_df['temp'] = data_df['temp'].astype(float)
+    data_df['humidity'] = data_df['humidity'].astype(float)
+    data_df['temp_min'] = data_df['tempmin'].astype(float)
+    data_df['temp_max'] = data_df['tempmax'].astype(float)
+    del data_df["tempmin"]
+    del data_df["tempmax"]
+
+    # adding variable for is_local
+    mask = data_df.gemeinde.isna() & data_df.bezirk.isna() & data_df.bundesland.isna()
 
     #replacing nans for variables
     data_df.loc[data_df.geschlecht.isna() == True, 'raucher'] = "unknown"
@@ -85,7 +116,15 @@ def format_variables(data, to_filter, drop_values):
             data_df = data_df.drop(to_filter, axis=1)
 
     # shuffling data with fixed seed
-    data_df = data_df.sample(frac=1, random_state=1).reset_index(drop=True)
+    n_rows = data_df.shape[0]
+    
+    # Create a seed for the random number generator based on the number of rows
+    seed = hash(n_rows) % 2**32
+    
+    # Shuffle the DataFrame using the seed
+    np.random.seed(seed)
+    data_df = data_df.sample(frac=1).reset_index(drop=True)
+    # data_df = data_df.sample(frac=1, random_state=1).reset_index(drop=True)
 
     # separating var types
     cat_feat_list = []
