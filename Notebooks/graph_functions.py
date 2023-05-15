@@ -19,6 +19,22 @@ matplotlib.rcParams.update({'font.size': 12})
 
 PLOT_COLOR = "blue"
 
+UNITS = {
+ 'schaetzwert_bp_sys': "(mmHg)",
+ 'schaetzwert_by_dia': "(mmHg)",
+ 'messwert_bp_sys': "(mmHg)",
+ 'messwert_bp_dia': "(mmHg)",
+ 'age': "(years)",
+ 'month': "",
+ 'hour': "",
+ 'day': "",
+ 'temp': "(°C)",
+ 'humidity': "(" + "$p/p_{s}$" + ")",
+ 'temp_min': "(°C)",
+ 'temp_max': "(°C)",
+ 'id': "",
+ 'geburtsjahr': ""
+}
 
 def create_histogram(data_df, col_name, hist_dir_path):
     min_value = data_df[col_name].min()
@@ -32,7 +48,7 @@ def create_histogram(data_df, col_name, hist_dir_path):
     min_ylim, max_ylim = plt.ylim()
     plt.text(data_df[col_name].mean()*1.1, max_ylim*0.9, 'Mean: {:.2f}'.format(data_df['messwert_bp_sys'].mean()))
     plt.text(data_df[col_name].median()*1.2, max_ylim*0.8, 'Median: {:.2f}'.format(data_df['messwert_bp_sys'].median()))
-    plt.xlabel(col_name + ' (mmHg)')
+    plt.xlabel(col_name + ' ' + UNITS[col_name])
     plt.ylabel("Frequency")
     plt.savefig(os.path.join(hist_dir_path, col_name + "_Hist.pdf"), dpi=180, bbox_inches='tight')
     plt.show()
@@ -43,6 +59,7 @@ def create_bar_plot(data_df, col_name, barplot_dir_path):
     counts = data_df[col_name].value_counts(ascending=True)
     categories = list(counts.index)
     categories = [str(x) if type(x) == bool else x for x in categories]
+    categories = sorted(categories, key=str.lower)
     
     figsize = (5, 5)
     if len(categories) > 6:
@@ -53,15 +70,17 @@ def create_bar_plot(data_df, col_name, barplot_dir_path):
             width = 0.4, alpha=0.65)
 
     plt.xlabel(col_name)
-    plt.ylabel("No. of people")
+    plt.ylabel("No. of participants")
     plt.savefig(os.path.join(barplot_dir_path, col_name + "_Bar.pdf"), dpi=180, bbox_inches='tight')
     plt.show()
 
 
 def create_box_plot(data_df, main_col, group_col, stacked_barplot_dir_path):
+    print(round(data_df.groupby(group_col).describe()[main_col], 2))
     f, ax = plt.subplots(figsize=(7, 6))
     order = data_df.groupby(by=[group_col])[main_col].median().sort_values().index
     plot = sns.boxplot(data=data_df, x=group_col, y=main_col, width=.5, orient="v", order=order)
+    plot.set(ylabel=main_col + " " + UNITS[main_col])
     plot.set_xticklabels(plot.get_xticklabels(),rotation=45)
     plt.show()
     plot.figure.savefig(os.path.join(stacked_barplot_dir_path, main_col + "_vs_" + group_col + "_barplot.pdf"), dpi=180)
@@ -80,8 +99,8 @@ def create_scatter_plot(data_df, col_list, x, misc_dir_path):
     for i in range(len(col_list)):
         for j in range(i+1, len(col_list)):
             plot = data_df.plot.scatter(col_list[i], col_list[j], label=f'{col_list[i]} vs {col_list[j]}',color=PLOT_COLOR, alpha=0.2)
-            plt.xlabel(col_list[i] + " (mmHg)")
-            plt.ylabel(col_list[j] + " (mmHg)")
+            plt.xlabel(col_list[i] + " " + UNITS[col_list[i]])
+            plt.ylabel(col_list[j] + " " + UNITS[col_list[j]])
             plt.plot(x, x, color='red')
             plot.get_legend().remove()
             plot.figure.savefig(os.path.join(misc_dir_path, col_list[i] +  "_vs_" + col_list[j] + ".pdf"), bbox_inches='tight')
@@ -117,7 +136,13 @@ def create_stacked_barplot(data_df, main_col, group_col, stacked_barplot_dir_pat
         if type(cat) != str:
             group_col_cats[i] = str(cat)
 
-    df_counts = pd.DataFrame(df_rows, columns=[main_col] + list(group_col_cats))
+    group_col_cats = list(group_col_cats)
+
+    df_counts = pd.DataFrame(df_rows, columns=[main_col] + group_col_cats)
+
+    print(main_col + " vs " + group_col)
+    print(df_counts)
+
     df = df_counts.copy()
     df.iloc[:, 1:] = df.iloc[:, 1:].apply(lambda x: x.div(x.sum()).mul(100), axis=1).astype(float)
     ax = df.plot(

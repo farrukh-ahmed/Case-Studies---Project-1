@@ -65,7 +65,8 @@ def format_variables(data, to_filter, drop_values):
     data_df["day"] = data_df["zeit"].dt.day
 
     # seggregating terminal when instrument was changed
-    data_df["terminal"] = np.where(data_df["month"].astype('int') <= 6, "3a", "3b")
+    data_df.loc[(data_df["month"].astype('int') <= 6) & (data_df["terminal"] == 3), "terminal"] = "3a"
+    data_df.loc[(data_df["month"].astype('int') > 6) & (data_df["terminal"] == 3), "terminal"] = "3b"
 
     # adding temp info
     data_df = fetch_weather_data(data_df)
@@ -92,7 +93,7 @@ def format_variables(data, to_filter, drop_values):
     data_df.loc[mask, 'postleitzahl'] = "not_applicable"
     data_df.loc[data_df.postleitzahl == "nan", 'postleitzahl'] = "unknown"
     data_df.loc[data_df.geschlecht.isna() == True, 'geschlecht'] = "unknown"
-
+    data_df.terminal = data_df.terminal.astype('str')
     
     if drop_values:
     # removing useless variables
