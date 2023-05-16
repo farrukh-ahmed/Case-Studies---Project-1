@@ -256,12 +256,13 @@ def best_subset_selection(features, criterion, X_train, Y_train, X_test, Y_test,
     n_features = len(features)
 
 
-    for i in range(1, n_features):
+    for i in range(1, n_features+1):
         if verbose > 1:
             print("\nNum features: ", i, "=======================================================")
 
         for j in range(n_features):
             current_features = features[j:j+i]
+
             if len(current_features) < i:
                 break
 
