@@ -75,7 +75,7 @@ def create_bar_plot(data_df, col_name, barplot_dir_path):
     plt.show()
 
 
-def create_box_plot(data_df, main_col, group_col, stacked_barplot_dir_path):
+def create_box_plot(data_df, main_col, group_col, boxplot_dir_path):
     print(round(data_df.groupby(group_col).describe()[main_col], 2))
     f, ax = plt.subplots(figsize=(7, 6))
     order = data_df.groupby(by=[group_col])[main_col].median().sort_values().index
@@ -83,7 +83,7 @@ def create_box_plot(data_df, main_col, group_col, stacked_barplot_dir_path):
     plot.set(ylabel=main_col + " " + UNITS[main_col])
     plot.set_xticklabels(plot.get_xticklabels(),rotation=45)
     plt.show()
-    plot.figure.savefig(os.path.join(stacked_barplot_dir_path, main_col + "_vs_" + group_col + "_barplot.pdf"), dpi=180)
+    plot.figure.savefig(os.path.join(boxplot_dir_path, main_col + "_vs_" + group_col + "_boxplot.pdf"), dpi=180)
 
 
 def create_heat_map(data_df, cols, misc_dir_path):
