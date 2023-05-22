@@ -4,10 +4,22 @@ import statsmodels.formula.api as smf
 from scipy import stats
 import matplotlib.pyplot as plt
 import seaborn as sns
+import calendar
+import statsmodels.api as sm
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
+
+
+sns.set(font_scale = 1.2)
+
+# used for plotting
+from matplotlib import pyplot as plt
+import matplotlib
+# setting font to 'Times New Roman'
+matplotlib.rcParams["font.family"] = "Times New Roman"
+matplotlib.rcParams.update({'font.size': 12})
 
 
 # function that reads data from csv
@@ -55,6 +67,7 @@ def format_variables(data, to_filter, drop_values):
     data_df.schaetzwert_bp_sys = pd.to_numeric(data_df.schaetzwert_bp_sys)
     data_df.schaetzwert_by_dia = pd.to_numeric(data_df.schaetzwert_by_dia)
     data_df.befinden = data_df.befinden.astype('str')
+    data_df.zeit = pd.to_datetime(data_df["zeit"])
 
     # adding variable for age
     age =  data_df["zeit"].dt.year - pd.to_datetime(data_df['geburtsjahr'], format='%Y').dt.year
@@ -62,7 +75,7 @@ def format_variables(data, to_filter, drop_values):
 
     data_df["month"] = data_df["zeit"].dt.month
     data_df["hour"] = data_df["zeit"].dt.hour
-    data_df["day"] = data_df["zeit"].dt.day
+    data_df["day"] = data_df["zeit"].dt.strftime('%A')
 
     # seggregating terminal when instrument was changed
     data_df.loc[(data_df["month"].astype('int') <= 6) & (data_df["terminal"] == 3), "terminal"] = "3a"
@@ -76,6 +89,9 @@ def format_variables(data, to_filter, drop_values):
     data_df['temp_max'] = data_df['tempmax'].astype(float)
     del data_df["tempmin"]
     del data_df["tempmax"]
+
+    d = dict(enumerate(calendar.month_abbr))
+    data_df['month'] = data_df['month'].map(d)
 
     # adding variable for is_local
     mask = data_df.gemeinde.isna() & data_df.bezirk.isna() & data_df.bundesland.isna()
@@ -101,7 +117,9 @@ def format_variables(data, to_filter, drop_values):
         data_df.drop(data_df[data_df.age < 15].index, inplace=True)
 
         # dropping nan values
-        data_df = data_df.dropna()
+
+        data_df = data_df.dropna(subset=['age'])
+        # data_df = data_df.dropna()
 
         data_df["age"] = data_df["age"].astype("int")
 
@@ -132,7 +150,7 @@ def format_variables(data, to_filter, drop_values):
     num_feat_list = []
 
     for var in data_df.columns:
-        if data_df[var].dtype == object:
+        if data_df[var].dtype == object or data_df[var].dtype == str or data_df[var].dtype == bool:
             cat_feat_list.append(var)
         else:
             num_feat_list.append(var)
@@ -233,14 +251,18 @@ def fit_linear_model(X_train, Y_train, X_test):
     return train_pred, test_pred, model
 
 
-def generate_qq_plot(Y):
-    stats.probplot(Y, plot=plt)
-    plt.show()
+def generate_qq_plot(model, model_name):
+    plot = plt.figure(figsize=(8, 6))
+    plot = sm.qqplot(model.resid, fit=True, line="45")
+    plot.savefig(model_name + "_qq.pdf", dpi=180, bbox_inches='tight')
 
 
-def generate_residual_plot(Y_train, model):
-    sns.residplot(x=Y_train, y=model.resid, lowess=True, line_kws=dict(color="g"))
-
+def generate_residual_plot(model, model_name):
+    plot = plt.figure(figsize=(8, 6))
+    plot.axes[0] = sns.residplot(x=model.fittedvalues, y=model.resid)
+    plt.ylabel('Residuals')
+    plt.xlabel('Fitted Values')
+    plot.savefig(model_name + "_resid.pdf", dpi=180, bbox_inches='tight')
 
 # method that performs best subset feat selection based on some creiterion like mse, adjusted_r_2 or r_2
 def best_subset_selection(features, criterion, X_train, Y_train, X_test, Y_test, model_type, params, verbose):

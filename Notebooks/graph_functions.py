@@ -11,7 +11,6 @@ sns.set(font_scale = 1.2)
 # used for plotting
 from matplotlib import pyplot as plt
 import matplotlib
-
 # setting font to 'Times New Roman'
 matplotlib.rcParams["font.family"] = "Times New Roman"
 matplotlib.rcParams.update({'font.size': 12})
@@ -35,6 +34,15 @@ UNITS = {
  'id': "",
  'geburtsjahr': ""
 }
+
+
+def generate_category_colors(dataframe, column):
+    categories = dataframe[column].unique()
+    colors = sns.color_palette("husl", len(categories))
+    color_map = dict(zip(categories, colors))
+    
+    return color_map
+
 
 def create_histogram(data_df, col_name, hist_dir_path):
     min_value = data_df[col_name].min()
@@ -75,15 +83,15 @@ def create_bar_plot(data_df, col_name, barplot_dir_path):
     plt.show()
 
 
-def create_box_plot(data_df, main_col, group_col, boxplot_dir_path):
+def create_box_plot(data_df, main_col, group_col, boxplot_dir_path, color_palette):
     print(round(data_df.groupby(group_col).describe()[main_col], 2))
     f, ax = plt.subplots(figsize=(7, 6))
     order = data_df.groupby(by=[group_col])[main_col].median().sort_values().index
-    plot = sns.boxplot(data=data_df, x=group_col, y=main_col, width=.5, orient="v", order=order)
+    plot = sns.boxplot(data=data_df, x=group_col, y=main_col, width=.5, orient="v", order=order, palette=color_palette)
     plot.set(ylabel=main_col + " " + UNITS[main_col])
     plot.set_xticklabels(plot.get_xticklabels(),rotation=45)
     plt.show()
-    plot.figure.savefig(os.path.join(boxplot_dir_path, main_col + "_vs_" + group_col + "_boxplot.pdf"), dpi=180)
+    plot.figure.savefig(os.path.join(boxplot_dir_path, main_col + "_vs_" + group_col + "_boxplot.pdf"), dpi=180, bbox_inches='tight')
 
 
 def create_heat_map(data_df, cols, misc_dir_path):
@@ -170,6 +178,6 @@ def create_stacked_barplot(data_df, main_col, group_col, stacked_barplot_dir_pat
         labels = [f'{round(pct, 1)}%' if int(count) > 0 else '' for pct, count in zip(pct_labels, count_labels)]
         ax.bar_label(c, labels=labels, label_type='center', color="black", fontsize=12)
 
-    plt.savefig(os.path.join(stacked_barplot_dir_path, main_col + "_vs_" + group_col + "_stacked_barplot.pdf"), dpi=180)
+    plt.savefig(os.path.join(stacked_barplot_dir_path, main_col + "_vs_" + group_col + "_stacked_barplot.pdf"), dpi=180, bbox_inches='tight')
 
     return df, df_counts
