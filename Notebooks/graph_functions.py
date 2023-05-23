@@ -1,17 +1,22 @@
+# Project: 1
+
+# Group: 3
+
+# Group Members:
+#  - Muhammad Raafey Tariq (231806)
+#  - Farrukh Ahmed (230614)
+#  - Amirreza Khamehchin Khiabani (230891)
+#  - Aymane Hachcham (236392)
+
+
 import pandas as pd
 import numpy as np
-import itertools
-import pprint
-from helper_functions import read_data, format_variables
-# used for the graphs
 import seaborn as sns
+import matplotlib
 import os
+from matplotlib import pyplot as plt
 sns.set(font_scale = 1.2)
 
-# used for plotting
-from matplotlib import pyplot as plt
-import matplotlib
-# setting font to 'Times New Roman'
 matplotlib.rcParams["font.family"] = "Times New Roman"
 matplotlib.rcParams.update({'font.size': 12})
 

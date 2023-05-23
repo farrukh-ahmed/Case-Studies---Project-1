@@ -1,7 +1,18 @@
+# Project: 1
+
+# Group: 3
+
+# Group Members:
+#  - Muhammad Raafey Tariq (231806)
+#  - Farrukh Ahmed (230614)
+#  - Amirreza Khamehchin Khiabani (230891)
+#  - Aymane Hachcham (236392)
+
+
+
 import pandas as pd
 import numpy as np
 import statsmodels.formula.api as smf
-from scipy import stats
 import matplotlib.pyplot as plt
 import seaborn as sns
 import calendar
