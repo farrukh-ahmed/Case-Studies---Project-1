@@ -269,8 +269,11 @@ def generate_qq_plot(model, model_name):
 
 
 def generate_residual_plot(model, model_name):
+    influence = model.get_influence()
+    st_residuals = influence.resid_studentized_internal
+
     plot = plt.figure(figsize=(8, 6))
-    plot.axes[0] = sns.residplot(x=model.fittedvalues, y=model.resid)
+    plot.axes[0] = sns.residplot(x=model.fittedvalues, y=st_residuals)
     plt.ylabel('Residuals')
     plt.xlabel('Fitted Values')
     plot.savefig(model_name + "_resid.pdf", dpi=180, bbox_inches='tight')
