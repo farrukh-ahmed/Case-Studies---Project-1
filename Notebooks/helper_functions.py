@@ -139,6 +139,26 @@ def format_variables(data, to_filter, drop_values):
     data_df['messwert_bp_dia'] = data_df['messwert_bp_dia'].astype(float)
     data_df['geschlecht'] = data_df['geschlecht'].astype(object)
 
+    rename_dict = {
+        "befinden": "felt_health_condition",
+        "geschlecht": "gender",
+        "raucher": "is_smoker",
+        "zeit": "time",
+        "blutzucker_bekannt": "is_diabetic",
+        "cholesterin_bekannt": "has_cholestrol",
+        "in_behandlung": "in_treatment",
+        "postleitzahl": "postal_code",
+        "gemeinde": "municipality",
+        "bezirk": "district",
+        "bundesland": "federal_state",
+        "geburtsjahr": "year_of_birth",
+        "schaetzwert_bp_sys": "self_eval_bp_sys",
+        "schaetzwert_by_dia": "self_eval_bp_dia",
+        "messwert_bp_sys": "measured_bp_sys",
+        "messwert_bp_dia": "measured_bp_dia",
+    }
+    data_df.rename(columns=rename_dict, inplace=True)
+
     # dropping values from filter
 
     if drop_values:

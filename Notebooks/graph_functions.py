@@ -24,10 +24,10 @@ matplotlib.rcParams.update({'font.size': 12})
 PLOT_COLOR = "blue"
 
 UNITS = {
- 'schaetzwert_bp_sys': "(mmHg)",
- 'schaetzwert_by_dia': "(mmHg)",
- 'messwert_bp_sys': "(mmHg)",
- 'messwert_bp_dia': "(mmHg)",
+ 'self_eval_bp_sys': "(mmHg)",
+ 'self_eval_bp_dia': "(mmHg)",
+ 'measured_bp_sys': "(mmHg)",
+ 'measured_bp_dia': "(mmHg)",
  'age': "(years)",
  'month': "",
  'hour': "",
@@ -37,7 +37,7 @@ UNITS = {
  'temp_min': "(°C)",
  'temp_max': "(°C)",
  'id': "",
- 'geburtsjahr': ""
+ 'year_of_birth': ""
 }
 
 
@@ -59,8 +59,8 @@ def create_histogram(data_df, col_name, hist_dir_path):
     plt.axvline(data_df[col_name].median(), color='k', linestyle='dashed', linewidth=2)
 
     min_ylim, max_ylim = plt.ylim()
-    plt.text(data_df[col_name].mean()*1.1, max_ylim*0.9, 'Mean: {:.2f}'.format(data_df['messwert_bp_sys'].mean()))
-    plt.text(data_df[col_name].median()*1.2, max_ylim*0.8, 'Median: {:.2f}'.format(data_df['messwert_bp_sys'].median()))
+    plt.text(data_df[col_name].mean()*1.1, max_ylim*0.9, 'Mean: {:.2f}'.format(data_df[col_name].mean()))
+    plt.text(data_df[col_name].median()*1.2, max_ylim*0.8, 'Median: {:.2f}'.format(data_df[col_name].median()))
     plt.xlabel(col_name + ' ' + UNITS[col_name])
     plt.ylabel("Frequency")
     plt.savefig(os.path.join(hist_dir_path, col_name + "_Hist.pdf"), dpi=180, bbox_inches='tight')
